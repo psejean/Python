@@ -1,7 +1,13 @@
 import logging
 import azure.functions as func
 import base64
+
+import sys
+# Add the 'lib' directory to sys.path so Python knows where to find the module
+sys.path.insert(0, './lib')
+
 from PyPDF2 import PdfReader
+
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
