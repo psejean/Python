@@ -2,6 +2,7 @@
 # to your entry point file.  
 # app.register_functions(function) 
 # 
+#
 # Please refer to https://aka.ms/azure-functions-python-blueprints
 
 
@@ -30,4 +31,5 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(
              "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
              status_code=200
-        )
+        )  
+  
