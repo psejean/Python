@@ -2,6 +2,7 @@
 # to your entry point file.  
 # app.register_functions(function) 
 # 
+#
 # Please refer to https://aka.ms/azure-functions-python-blueprints
 
 
