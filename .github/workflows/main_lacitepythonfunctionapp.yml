@@ -1,3 +1,7 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+# More info on Python, GitHub Actions, and Azure Functions: https://aka.ms/python-webapps-actions
+
 name: Build and deploy Python project to Azure Function App - LaCitePythonFunctionApp
 
 on:
@@ -8,7 +12,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  PYTHON_VERSION: '3.11' # set this to the Python version to use (supports 3.6, 3.7, 3.8, etc.)
+  PYTHON_VERSION: '3.11' # set this to the python version to use (supports 3.6, 3.7, 3.8)
 
 jobs:
   build:
@@ -27,27 +31,21 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
-      - name: Install PyPDF2 explicitly
-        run: |
-          pip install PyPDF2==1.26.0
-
-      - name: Install other dependencies from requirements.txt
-        run: |
-          pip install -r requirements.txt
-          
-      - name: Log installed packages
-        run: pip freeze # Logs installed packages to the console
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
-        run: zip -x "venv/*" -r release.zip . # Exclude the venv directory
+        run: zip release.zip ./* -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: python-app
-          path: release.zip
+          path: |
+            release.zip
+            !venv/
 
   deploy:
     runs-on: ubuntu-latest
@@ -65,8 +63,8 @@ jobs:
           name: python-app
 
       - name: Unzip artifact for deployment
-        run: unzip release.zip
-
+        run: unzip release.zip     
+        
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -80,6 +78,6 @@ jobs:
         with:
           app-name: 'LaCitePythonFunctionApp'
           slot-name: 'Production'
-          package: release.zip
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           scm-do-build-during-deployment: true
           enable-oryx-build: true
