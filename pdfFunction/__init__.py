@@ -20,7 +20,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         if not base64_pdf:
             logging.error("No PDF data provided in the request.")
-            return func.HttpResponse("Missing PDF data", status_code=400)
+            return func.HttpResponse(json.dumps({"error": "Missing PDF data"}), status_code=400, headers={"Content-Type": "application/json"})
 
         # Decode the base64 string to bytes and create a stream
         try:
@@ -29,22 +29,23 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             reader = PdfReader(pdf_stream)
         except Exception as e:
             logging.error(f"Failed to decode base64 PDF data or initialize PdfReader: {e}")
-            return func.HttpResponse("Error decoding base64 data or initializing PdfReader", status_code=500)
+            return func.HttpResponse(json.dumps({"error": "Error decoding base64 data or initializing PdfReader"}), status_code=500, headers={"Content-Type": "application/json"})
 
         text_content = []
 
         # Extract text from each page
         try:
             for page in reader.pages:
-                text_content.append(page.extract_text())
+                extracted_text = page.extract_text()
+                if extracted_text:
+                    text_content.append(extracted_text)
         except Exception as e:
-            logging.error(f"Failed to extract text from page: {e}")
-            return func.HttpResponse("Error extracting text from PDF", status_code=500)
+            logging.error(f"Failed to extract text from PDF: {e}")
+            return func.HttpResponse(json.dumps({"error": "Error extracting text from PDF"}), status_code=500, headers={"Content-Type": "application/json"})
 
         # Join all text from all pages
         extracted_text = ' '.join(text_content)
-
-        return func.HttpResponse(extracted_text, status_code=200)
+        return func.HttpResponse(json.dumps({"extractedText": extracted_text}), status_code=200, headers={"Content-Type": "application/json"})
     except Exception as e:
         logging.exception("An unexpected error occurred while processing the PDF.")
-        return func.HttpResponse("An unexpected error occurred.", status_code=500)
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, headers={"Content-Type": "application/json"})
