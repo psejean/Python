@@ -46,8 +46,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 text_content.append(extracted_text)
 
         extracted_text = ' '.join(text_content)
+        cleaned_text = clean_extracted_text(extracted_text)  # Add post-processing step
+
         return func.HttpResponse(
-            json.dumps({"extractedText": extracted_text}),
+            json.dumps({"extractedText": cleaned_text}),
             status_code=200,
             headers={"Content-Type": "application/json"}
         )
@@ -58,3 +60,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500,
             headers={"Content-Type": "application/json"}
         )
+
+def clean_extracted_text(text):
+    # Regular expression to remove unintended spaces between digits and characters
+    cleaned_text = re.sub(r'(\d{2,})\s(-\d{2,}-\w+)', r'\1\2', text)
+    return cleaned_text
