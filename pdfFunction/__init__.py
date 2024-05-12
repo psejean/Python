@@ -11,6 +11,7 @@ logging.basicConfig(level=logging.INFO)
 # Add the 'lib' directory to sys.path so Python knows where to find the module
 sys.path.insert(0, './lib')
 from PyPDF2 import PdfReader
+import re
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Processing PDF extraction request")
@@ -41,12 +42,29 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         text_content = []
         for page in reader.pages:
-            extracted_text = page.extract_text()
-            if extracted_text:
-                text_content.append(extracted_text)
+            try:
+                extracted_text = page.extract_text()
+                if extracted_text:
+                    text_content.append(extracted_text)
+            except Exception as e:
+                logging.error(f"Error extracting text from page: {e}")
+                return func.HttpResponse(
+                    json.dumps({"error": "Unable to extract text from PDF page"}),
+                    status_code=500,
+                    headers={"Content-Type": "application/json"}
+                )
 
         extracted_text = ' '.join(text_content)
-        cleaned_text = clean_extracted_text(extracted_text)  # Add post-processing step
+        
+        try:
+            cleaned_text = clean_extracted_text(extracted_text)  # Add post-processing step
+        except Exception as e:
+            logging.error(f"Error cleaning extracted text: {e}")
+            return func.HttpResponse(
+                json.dumps({"error": "Unable to clean extracted text"}),
+                status_code=500,
+                headers={"Content-Type": "application/json"}
+            )
 
         return func.HttpResponse(
             json.dumps({"extractedText": cleaned_text}),
