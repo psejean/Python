@@ -83,5 +83,5 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
 def clean_extracted_text(text):
     # Regular expression to remove unintended spaces and newline characters between digits and characters
-    cleaned_text = re.sub(r'(\b\w{2,})(?:\s*|\n)(-\d{2})(?:\s*|\n)(-\w+)', r'\1\2\3', text)
+    cleaned_text = re.sub(r'(\b\w{2,})(?:\s*|\n)(\d{2})(?:\s*|\n)(-\w+)', r'\1\2\3', text)
     return cleaned_text
