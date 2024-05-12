@@ -11,7 +11,6 @@ logging.basicConfig(level=logging.INFO)
 # Add the 'lib' directory to sys.path so Python knows where to find the module
 sys.path.insert(0, './lib')
 from PyPDF2 import PdfReader
-import re
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Processing PDF extraction request")
@@ -57,19 +56,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         extracted_text = ' '.join(text_content)
         logging.info(f"Extracted Text: {extracted_text}")
 
-        try:
-            cleaned_text = clean_extracted_text(extracted_text)  # Add post-processing step
-            logging.info(f"Cleaned Text: {cleaned_text}")
-        except Exception as e:
-            logging.error(f"Error cleaning extracted text: {e}")
-            return func.HttpResponse(
-                json.dumps({"error": "Unable to clean extracted text"}),
-                status_code=500,
-                headers={"Content-Type": "application/json"}
-            )
-
         return func.HttpResponse(
-            json.dumps({"extractedText": cleaned_text}),
+            json.dumps({"extractedText": extracted_text}),
             status_code=200,
             headers={"Content-Type": "application/json"}
         )
@@ -80,9 +68,3 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500,
             headers={"Content-Type": "application/json"}
         )
-
-def clean_extracted_text(text):
-    # Regular expression to remove unintended spaces and newline characters between digits and characters
-    pattern = re.compile(r'(\b\w{2})(\s|\n)(\d{2})(-\d{2}-\w+)')
-    cleaned_text = pattern.sub(r'\1\3\4', text)
-    return cleaned_text
