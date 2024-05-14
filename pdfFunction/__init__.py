@@ -68,14 +68,3 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500,
             headers={"Content-Type": "application/json"}
         )
-
-# Add a new route for health check
-def health_check(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Health check endpoint hit.')
-    return func.HttpResponse("Service is online", status_code=200)
-
-app = func.FunctionApp()
-
-# Register your existing function and the health check function
-app.route('pdfFunction', methods=['POST'], auth_level=func.AuthLevel.ANONYMOUS)(main)
-app.route('healthcheck', methods=['GET'], auth_level=func.AuthLevel.ANONYMOUS)(health_check)
